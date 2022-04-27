@@ -1,18 +1,15 @@
-from random import shuffle, choice, sample, random
+from random import uniform, random
 from operator import attrgetter
 
 
 class Individual:
     ''' Holds a weight set that can be used for the neural network '''
     
-    def __init__(self, representation = None, size = 5, replacement = True, valid_set = [0, 1],):
+    def __init__(self, representation = None, size = 5, valid_set = [0, 1]):
         self.representation = []
 
         if representation is None:
-            if replacement == True:
-                self.representation = [choice(valid_set) for i in range(size)]
-            elif replacement == False:
-                self.representation = sample(valid_set, size)
+            self.representation = [uniform(valid_set[0], valid_set[1]) for i in range(size)]
         else:
             self.representation = representation
         self.fitness = self.get_fitness()
@@ -42,7 +39,6 @@ class Population:
             self.individuals.append(
                 Individual(
                     size=kwargs["sol_size"],
-                    replacement=kwargs["replacement"],
                     valid_set=kwargs["valid_set"],
                 )
             )
