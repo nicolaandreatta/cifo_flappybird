@@ -4,10 +4,6 @@ from selection import fps, tournament
 from crossover import single_point_co
 from mutation import binary_mutation
 
-print('Hello World')
-print('ipdfvunőd')
-print('ifubsf')
-
 # Monkey Patching
 Individual.get_fitness = get_fitness
 
@@ -16,10 +12,9 @@ popSize = 20
 problemType = 'max'
 solSize = 5
 validSet = [0, 1]
-replacement = True
 
 # initialize population
-pop = Population(size = popSize, optim = problemType, sol_size = solSize, valid_set = validSet, replacement = replacement)
+pop = Population(size = popSize, optim = problemType, sol_size = solSize, valid_set = validSet)
 
 print(pop)
 
