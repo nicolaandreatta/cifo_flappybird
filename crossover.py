@@ -1,6 +1,7 @@
-from random import randint
+from random import randint, uniform
+from charles import Individual
 
-def single_point_co(p1, p2):
+def single_point_co(p1, p2, crossoverProbab):
     """Implementation of single point crossover.
 
     Args:
@@ -10,14 +11,22 @@ def single_point_co(p1, p2):
     Returns:
         Individuals: Two offspring, resulting from the crossover.
     """
-    co_point = randint(1, len(p1)-2)
-
-    offspring1 = p1[:co_point] + p2[co_point:]
-    offspring2 = p2[:co_point] + p1[co_point:]
+    #print(p1)
+    #print(p2)
+    # decide whether to perform crossover
+    if crossoverProbab > uniform(0, 1):
+        # select the index where to cut the dna s 
+        co_point = randint(1, len(p1)-2)
+        #print('copoint:', co_point)
+        newRepr1 = p1.representation[:co_point] + p2.representation[co_point:]
+        #print('newRepr1:', newRepr1)
+        offspring1 = Individual(representation = newRepr1, size=len(p1), valid_set=p1.valid_set)
+        newRepr2 = p2.representation[:co_point] + p1.representation[co_point:]
+        #print('newRepr2:', newRepr2)
+        offspring2 = Individual(representation = newRepr2, size=len(p1), valid_set=p1.valid_set)
+        #print('o1', offspring1)
+        #print('o2', offspring2)
+    else: 
+        offspring1, offspring2 = p1, p2
 
     return offspring1, offspring2
-
-
-if __name__ == '__main__':
-    p1, p2 = [0, 0, 0, 0, 0], [1, 1, 1, 1, 1]
-    o1, o2 = single_point_co(p1, p2)
