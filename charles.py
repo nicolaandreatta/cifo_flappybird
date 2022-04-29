@@ -1,4 +1,4 @@
-from random import uniform, random
+from random import uniform, random, choice
 from operator import attrgetter
 
 
@@ -7,15 +7,24 @@ class Individual:
     
     def __init__(self, representation = None, size = 5, valid_set = [0, 1]):
         self.representation = []
+        self.valid_set = valid_set
 
         if representation is None:
-            self.representation = [uniform(valid_set[0], valid_set[1]) for i in range(size)]
+            self.representation = [round(uniform(valid_set[0], valid_set[1]), 4) for i in range(size)]
         else:
             self.representation = representation
-        self.fitness = self.get_fitness()
-        
-    def get_fitness(self):
+
+        self.fitness = self.calc_fitness()
+    
+    def update_fitness(self):
+        ''' Recalculate fitness - to be used after mutation'''
+        self.fitness = self.calc_fitness()
+
+    def calc_fitness(self):
         raise Exception("You need to monkey patch the fitness path.")
+    
+    def get_fitness(self):
+        return self.fitness
 
     def __len__(self):
         return len(self.representation)
@@ -27,7 +36,7 @@ class Individual:
         self.representation[position] = value
 
     def __repr__(self):
-        return f"Individual(size={len(self.representation)}); Weights: {self.representation}, Fitness: {self.fitness}"
+        return f"Individual: {self.representation}, Fitness: {self.fitness}"
 
 
 class Population:
@@ -43,32 +52,43 @@ class Population:
                 )
             )
 
-    def evolve(self, gens, select, crossover, mutate, co_p, mu_p, elitism):
+    def evolve(self, gens, select, tournamentSize, crossover, mutate, crossoverProbab, mutationProbab, elitism):
         for gen in range(gens):
-            new_pop = []
+            newPop = []
+            popSizeOdd = (self.size % 2 == 1)
 
-            while len(new_pop) < self.size:
-                parent1, parent2 = select(self), select(self)
-                # Crossover
-                if random() < co_p:
-                    offspring1, offspring2 = crossover(parent1, parent2)
-                else:
-                    offspring1, offspring2 = parent1, parent2
-                # Mutation
-                if random() < mu_p:
-                    offspring1 = mutate(offspring1)
-                if random() < mu_p:
-                    offspring2 = mutate(offspring2)
-
-                new_pop.append(Individual(representation=offspring1))
-                if len(new_pop) < self.size:
-                    new_pop.append(Individual(representation=offspring2))
-
+            # select the best indiv in the pop and add it to newPop
             if elitism:
-                raise NotImplementedError
+                elite = self.get_elite()
+                if popSizeOdd:
+                    # when popsize is odd simply add elitism is true simply add the elite member to the newPop
+                    newPop.append(elite)
+                else: 
+                    # when popsize is even we need to add the elite member as well as another random member 
+                    newPop.append(elite)
+                    randomIndiv = choice(self.individuals)
+                    newPop.append(randomIndiv)
+            else: 
+                if popSizeOdd: 
+                    # when no elitism and popsize is odd: we need to add a random member to the newPop
+                    randomIndiv = choice(self.individuals)
+                    newPop.append(randomIndiv)
 
-            self.individuals = new_pop
-            print(f'Best Individual: {max(self, key=attrgetter("fitness"))}')
+            while len(newPop) < self.size:
+                # Selection
+                parent1, parent2 = select(self, tournamentSize), select(self, tournamentSize)
+                # Crossover
+                offspring1, offspring2 = crossover(parent1, parent2, crossoverProbab)
+                # Mutation
+                offspring1 = mutate(offspring1, mutationProbab)
+                offspring2 = mutate(offspring2, mutationProbab)
+
+                newPop.append(offspring1)
+                newPop.append(offspring2)
+
+            self.individuals = newPop
+            print(f'Gen {gen} Best: {max(self.individuals, key=attrgetter("fitness"))}')
+    
 
     def __len__(self):
         return len(self.individuals)
@@ -77,4 +97,12 @@ class Population:
         return self.individuals[position]
 
     def __repr__(self):
-        return f"Population(size={len(self.individuals)}, individual_size={len(self.individuals[0])}, first indiv: {self.individuals[0]})"
+        return f"Population(size={len(self.individuals)}, individual_size={len(self.individuals[0])}, first indiv: {self.individuals[0]} \n)"
+
+    def get_elite(self):
+        ''' Retrieve the individual with the best fitness'''
+        elite = self.individuals[0]
+        for ind in self.individuals[1:]:
+            if ind.get_fitness() > elite.get_fitness():
+                elite = ind
+        return elite

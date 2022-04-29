@@ -1,6 +1,6 @@
-from random import randint
+from random import randint, uniform
 
-def binary_mutation(individual):
+def binary_mutation(individual, mutationProbab):
     """Binary mutation for a GA individual
 
     Args:
@@ -12,20 +12,14 @@ def binary_mutation(individual):
     Returns:
         Individual: Mutated Individual
     """
-    mut_point = randint(0, len(individual) - 1)
-
-    if individual[mut_point] == 0:
-        individual[mut_point] = 1
-    elif individual[mut_point] == 1:
-        individual[mut_point] = 0
-    else:
-        raise Exception(
-            f"Trying to do binary mutation on {individual}. But it's not binary.")
-
+    # decide whether to perform mutation
+    if mutationProbab > uniform(0, 1):
+        # select the index of the weight to be mutated
+        mutationPoint = randint(0, len(individual) - 1)
+        # generate random new weight 
+        individual[mutationPoint] = round(uniform(individual.valid_set[0], individual.valid_set[1]), 4)
+        # update fitness of indiv after mutation
+        individual.update_fitness()
     return individual
 
-
-if __name__ == '__main__':
-    test = [0,0,0,0,0,0,0,0]
-    test = binary_mutation(test)
 

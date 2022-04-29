@@ -1,6 +1,5 @@
-from random import uniform, sample
+from random import uniform, choice
 from operator import attrgetter
-
 
 def fps(population):
     """Fitness proportionate selection implementation.
@@ -31,7 +30,7 @@ def fps(population):
         raise Exception("No optimization specified (min or max).")
 
 
-def tournament(population, size=20):
+def tournament(population, tournamentSize = 5):
     """Tournament selection implementation.
 
     Args:
@@ -43,7 +42,8 @@ def tournament(population, size=20):
     """
 
     # Select individuals based on tournament size
-    tournament = sample(population.individuals, size)
+    #tournament = sample(population.individuals, size)
+    tournament = [choice(population.individuals) for _ in range(tournamentSize)]
     # Check if the problem is max or min
     if population.optim == 'max':
         return max(tournament, key=attrgetter("fitness"))

@@ -1,0 +1,5 @@
+{
+    "python.analysis.extraPaths": [
+        "./FlappyBird_Python-master"
+    ]
+}
