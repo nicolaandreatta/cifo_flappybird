@@ -1,9 +1,10 @@
 #import flappy_update
 #from flappy import play_game
+from nn import create_net
 
 def build_neural_network(weightList):
-    
-    return 0
+    nn = create_net()
+    return nn
 
 def play_flappy_bird(nn):
     #return play_game()
