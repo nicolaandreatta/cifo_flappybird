@@ -5,12 +5,18 @@ from operator import attrgetter
 class Individual:
     ''' Holds a weight set that can be used for the neural network '''
     
-    def __init__(self, representation = None, size = 5, valid_set = [0, 1]):
+    def __init__(self, representation = None, size = 5, valid_set = [0, 1], nnNumberOfInputs = 5):
         self.representation = []
         self.valid_set = valid_set
 
         if representation is None:
-            self.representation = [round(uniform(valid_set[0], valid_set[1]), 4) for i in range(size)]
+            # generate random weights for layer zero (input size * number of neurons)
+            for _ in range(nnNumberOfInputs):
+                self.representation = self.representation + [round(uniform(valid_set[0], valid_set[1]), 4) for _ in range(size)]
+
+            # generate random weights for layer one (number of neurons of layer 0)
+            self.representation = self.representation + [round(uniform(valid_set[0], valid_set[1]), 4) for _ in range(size)]
+            
         else:
             self.representation = representation
 
