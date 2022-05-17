@@ -29,7 +29,11 @@ def build_neural_network(weightList, numberOfGameParams=5):
     #print('game params: ', numberOfGameParams)
     model = Sequential()
     model.add(Dense(units = numberOfNeurons, activation = 'relu', input_shape = (numberOfGameParams,)))
+    
+    # TODO decide on activation function
+
     model.add(Dense(units = 1, activation = 'sigmoid'))
+    #model.add(Dense(units = 1, activation = 'linear'))
     model.compile(optimizer = 'rmsprop', loss = 'binary_crossentropy', metrics = ['accuracy'])
     
     #print('nn weights after init', model.layers[0].get_weights()[0])

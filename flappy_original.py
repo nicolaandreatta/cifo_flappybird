@@ -1,7 +1,6 @@
 """
 The classic game of flappy bird. Make with python
 and pygame. Features pixel perfect collision using masks :o
-
 Date Modified:  Jul 30, 2019
 Author: Tech With Tim
 Estimated Work Time: 5 hours (1 just for that damn collision)
@@ -9,11 +8,9 @@ Estimated Work Time: 5 hours (1 just for that damn collision)
 import pygame
 import random
 import os
-from keras.models import Sequential
 import time
 pygame.font.init()  # init font
 import numpy as np
-import tensorflow as tf
 from math import sqrt
 
 WIN_WIDTH = 600
@@ -66,7 +63,7 @@ class Bird:
         make the bird jump
         :return: None
         """
-        self.vel = -9.7
+        self.vel = -10.5
         self.tick_count = 0
         self.height = self.y
 
@@ -322,30 +319,25 @@ def draw_window(win, bird, pipes, base, score):
 
     pygame.display.update()
 
+
 def calc_euc_dist(vec1x, vec1y, vec2x, vec2y):
     point1 = np.array((vec1x, vec1y))
     point2 = np.array((vec2x, vec2y))
     return np.linalg.norm(point1 - point2)
 
-
-def main(win, nn = None):
+def main(win):
     """
     Runs the main game loop
     :param win: pygame window surface
     :return: None
     """
-
-    if nn == None:
-        nn = Sequential()
-
     bird = Bird(230,350)
     base = Base(FLOOR)
     pipes = [Pipe(700)]
     score = 0
 
     clock = pygame.time.Clock()
-    #start = False
-    start = True
+    start = False
     lost = False
 
     run = True
@@ -353,18 +345,8 @@ def main(win, nn = None):
         pygame.time.delay(30)
         clock.tick(60)
 
-        # do prediction at every iteration whether the bird should flap
-        gameStateVariables = np.array([bird.x, bird.y, bird.vel, pipes[-1].top, pipes[-1].bottom]).reshape(1, 5)
-        
-        flapProbab = nn.predict(gameStateVariables)
-        if flapProbab[0] > 0.5:
-            bird.jump()
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                #update score by adding relative dist to next pipe
-                score += (1- calc_euc_dist(bird.x, bird.y, pipes[-1].x, pipes[-1].height) / MAX_DIST)
-                print('returned with score: ', score)
                 run = False
                 pygame.quit()
                 quit()
@@ -390,14 +372,6 @@ def main(win, nn = None):
                     # check for collision
                     if pipe.collide(bird, win):
                         lost = True
-                        run = False
-                        #update score by adding relative dist to next pipe
-                        score += (1- calc_euc_dist(bird.x, bird.y, pipes[-1].x, pipes[-1].height) / MAX_DIST)
-                        print('returned with score: ', score)
-                        return score
-                        pygame.quit()
-                        quit()
-                        
 
                     if pipe.x + pipe.PIPE_TOP.get_width() < 0:
                         rem.append(pipe)
@@ -412,29 +386,22 @@ def main(win, nn = None):
 
                 for r in rem:
                     pipes.remove(r)
-
+        
+        print('dist ', calc_euc_dist(bird.x, bird.y, pipes[-1].x, pipes[-1].height))
+        print('rel dist ', calc_euc_dist(bird.x, bird.y, pipes[-1].x, pipes[-1].height) / MAX_DIST)
+        print(bird.x, bird.y, pipes[-1].x, pipes[-1].height)
 
         if bird.y + bird_images[0].get_height() - 10 >= FLOOR:
-            #print('touched floor)
-            #update score by adding relative dist to next pipe
-            score += (1- calc_euc_dist(bird.x, bird.y, pipes[-1].x, pipes[-1].height) / MAX_DIST)
-            print('returned with score: ', score)
-            return score
+            print('touched florr')
+            break
 
-        
         if bird.y + bird_images[0].get_height() + 10 <= ROOF:
-            #print('touched roof')
-            #update score by adding relative dist to next pipe
-            score += (1- calc_euc_dist(bird.x, bird.y, pipes[-1].x, pipes[-1].height) / MAX_DIST)
-            print('returned with score: ', score)
-            return score
+            print('touched roof')
+            break
+
 
         draw_window(WIN, bird, pipes, base, score)
 
-
     end_screen(WIN)
 
-    return score
-
-#s = main(WIN) 
-#print(s)
+main(WIN)
